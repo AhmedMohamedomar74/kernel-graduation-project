@@ -2,12 +2,14 @@
 
 # Bash Script to Analyze Network Traffic
 
+# 2>/dev/null to hide Running as user "root" and group "root". This could be dangerous.
+
 # Input: Path to the Wireshark pcap file
-pcap_file="/home/ahmedomar/Downloads/capture.pcap"
+pcap_file="/home/ahmedomar/Downloads/Linux.pcap"
 
 extract_top_5_dest_ip() {
     # extract all ip destionations 
-    sudo tshark -r "${pcap_file}" -T fields -e ip.dst > ip_dest.txt
+    sudo tshark -r "${pcap_file}" -T fields -e ip.dst > ip_dest.txt 2>/dev/null
 
     # remove white spaces in txt
     sed -i '/^$/d;s/[[:blank:]]//g' ip_dest.txt
@@ -22,7 +24,7 @@ extract_top_5_dest_ip() {
 
 extract_top_5_source_ip() {
     # extract all ip destionations 
-    sudo tshark -r "${pcap_file}" -T fields -e ip.src > ip_src.txt
+    sudo tshark -r "${pcap_file}" -T fields -e ip.src > ip_src.txt 2>/dev/null
 
     # remove white spaces in txt
     sed -i '/^$/d;s/[[:blank:]]//g' ip_src.txt
@@ -35,7 +37,7 @@ extract_top_5_source_ip() {
 }
 
 total_packet () {
-    sudo tshark -r "${pcap_file}" -T fields -e ip.dst > ip_dest.txt
+    sudo tshark -r "${pcap_file}" -T fields -e ip.dst > ip_dest.txt 2>/dev/null
 
     # counting the lines (total packer)
 
@@ -56,9 +58,9 @@ your_http_packets() {
     fi
 }
 
-your_https_packets() {
+your_https_TLS_packets() {
     # Count the number of HTTPS packets
-    packet_count=$(sudo tshark -r "${pcap_file}" -Y https | wc -l)
+    packet_count=$(sudo tshark -r "${pcap_file}" -Y tls | wc -l)
 
     # Check if the count is zero
     if (( packet_count == 0 )); then
@@ -82,10 +84,8 @@ analyze_traffic() {
     echo "1. Total Packets: [your_total_packets]"
     total_packet
     echo "2. Protocols:"
-    echo "   - HTTP: [your_http_packets] packets"
-    your_http_packets
-    echo "   - HTTPS/TLS: [your_https_packets] packets"
-    your_https_packets
+    your_http_packets  2>/dev/null
+    your_https_TLS_packets  2>/dev/null
     echo "3. Top 5 Source IP Addresses:"
     # Provide the top source IP addresses
     echo "[your_top_source_ips]"
